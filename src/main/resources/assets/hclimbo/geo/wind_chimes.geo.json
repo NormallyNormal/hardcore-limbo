@@ -1,0 +1,118 @@
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.wind_chimes",
+				"texture_width": 64,
+				"texture_height": 32,
+				"visible_bounds_width": 2,
+				"visible_bounds_height": 2.5,
+				"visible_bounds_offset": [0, 0.75, 0]
+			},
+			"bones": [
+				{
+					"name": "Main",
+					"pivot": [0, 16, 0],
+					"cubes": [
+						{"origin": [-5, 15, -5], "size": [10, 1, 10], "uv": [0, 0]},
+						{"origin": [-2, 15, -6], "size": [4, 1, 1], "uv": [0, 1]},
+						{"origin": [5, 15, -2], "size": [1, 1, 4], "uv": [0, 4]},
+						{"origin": [-6, 15, -2], "size": [1, 1, 4], "uv": [0, 4]},
+						{"origin": [-2, 15, 5], "size": [4, 1, 1], "uv": [0, 1]}
+					]
+				},
+				{
+					"name": "Center",
+					"parent": "Main",
+					"pivot": [0, 16, 0],
+					"cubes": [
+						{"origin": [-1.5, 4, 0], "size": [3, 12, 0], "uv": [16, 18]},
+						{"origin": [-1.5, 4, 0], "size": [3, 12, 0], "uv": [26, 18]},
+						{"origin": [-1.5, 1, -1.5], "size": [3, 3, 3], "uv": [48, 0]},
+						{"origin": [-2, 9, -2], "size": [4, 1, 4], "uv": [48, 16]}
+					]
+				},
+				{
+					"name": "HangBone",
+					"parent": "Main",
+					"pivot": [0, 0, 0],
+					"cubes": [
+						{"origin": [5, 13, -0.5], "size": [0, 2, 1], "uv": [28, 25]},
+						{"origin": [-0.5, 13, 5], "size": [1, 2, 0], "uv": [28, 26]},
+						{"origin": [-5, 13, -0.5], "size": [0, 2, 1], "uv": [28, 25]},
+						{"origin": [-0.5, 13, -5], "size": [1, 2, 0], "uv": [28, 26]},
+						{"origin": [-0.5, 13, -4.5], "size": [1, 2, 0], "uv": [28, 26]},
+						{"origin": [4.5, 13, -0.5], "size": [0, 2, 1], "uv": [28, 25]},
+						{"origin": [-4.5, 13, -0.5], "size": [0, 2, 1], "uv": [28, 25]},
+						{"origin": [-4.5, 13, -0.5], "size": [0, 2, 1], "uv": [28, 25]}
+					]
+				},
+				{
+					"name": "ChimeBone8",
+					"parent": "HangBone",
+					"pivot": [5, 14, 0],
+					"cubes": [
+						{"origin": [4, 2, -1], "size": [2, 12, 2], "uv": [0, 16]}
+					]
+				},
+				{
+					"name": "ChimeBone7",
+					"parent": "HangBone",
+					"pivot": [3, 14, 3],
+					"cubes": [
+						{"origin": [2, 1, 2], "size": [2, 13, 2], "uv": [8, 16]}
+					]
+				},
+				{
+					"name": "ChimeBone6",
+					"parent": "HangBone",
+					"pivot": [0, 14, 5],
+					"cubes": [
+						{"origin": [-1, 5, 4], "size": [2, 9, 2], "uv": [0, 16]}
+					]
+				},
+				{
+					"name": "ChimeBone5",
+					"parent": "HangBone",
+					"pivot": [-3, 14, 3],
+					"cubes": [
+						{"origin": [-4, 3, 2], "size": [2, 11, 2], "uv": [8, 16]}
+					]
+				},
+				{
+					"name": "ChimeBone4",
+					"parent": "HangBone",
+					"pivot": [-5, 14, 0],
+					"cubes": [
+						{"origin": [-6, 0, -1], "size": [2, 14, 2], "uv": [0, 16]}
+					]
+				},
+				{
+					"name": "ChimeBone3",
+					"parent": "HangBone",
+					"pivot": [-3, 14, -3],
+					"cubes": [
+						{"origin": [-4, 0, -4], "size": [2, 14, 2], "uv": [8, 16]}
+					]
+				},
+				{
+					"name": "ChimeBone1",
+					"parent": "HangBone",
+					"pivot": [3, 14, -3],
+					"cubes": [
+						{"origin": [2, 3, -4], "size": [2, 11, 2], "uv": [8, 16]}
+					]
+				},
+				{
+					"name": "ChimeBone2",
+					"parent": "HangBone",
+					"pivot": [0, 14, -5],
+					"cubes": [
+						{"origin": [-1, 1, -6], "size": [2, 13, 2], "uv": [0, 16]}
+					]
+				}
+			]
+		}
+	]
+}

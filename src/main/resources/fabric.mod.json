@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "hclimbo",
+  "version": "${version}",
+
+  "name": "Hardcore Limbo",
+  "description": "Revive dead players in multiplayer hardcore worlds.",
+  "authors": [
+    "NormallyNormal"
+  ],
+  "contact": {
+    "homepage": "",
+    "sources": ""
+  },
+
+  "license": "cc-by-4.0",
+  "icon": "assets/modid/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.normallynormal.hardcorelimbo.HardcoreLimbo"
+    ],
+    "client": [
+      {
+        "value": "com.normallynormal.hardcorelimbo.HardcoreLimboClient"
+      }
+    ]
+  },
+  "mixins": [
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.7.4",
+    "fabric": "*",
+    "minecraft": "1.16.x"
+  },
+  "suggests": {
+    "flamingo": "*"
+  }
+}
