@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " W ",
+    "CCC",
+    "IGI"
+  ],
+  "key": {
+    "W": {
+      "tag": "minecraft:logs"
+    },
+    "C": {
+      "item": "minecraft:chain"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "G": {
+      "item": "minecraft:gold_ingot"
+    }
+  },
+  "result": {
+    "item": "hclimbo:wind_chimes",
+    "count": 1
+  }
+}
