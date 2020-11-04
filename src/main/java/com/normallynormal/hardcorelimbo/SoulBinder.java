@@ -8,8 +8,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.IntProperty;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
@@ -79,6 +81,7 @@ public class SoulBinder extends Block implements BlockEntityProvider{
 
     public ActionResult onUse(BlockState blockState, World world, BlockPos blockPos, PlayerEntity player, Hand hand, BlockHitResult blockHitResult) {
         if (world.isClient) return ActionResult.SUCCESS;
+        System.out.println(((PlayerEntityExt)player).getLastDeathLocation());
         Inventory blockEntity = (Inventory) world.getBlockEntity(blockPos);
         if (!player.getStackInHand(hand).isEmpty()) {
             // Check what is the first open slot and put an item from the player's hand there
