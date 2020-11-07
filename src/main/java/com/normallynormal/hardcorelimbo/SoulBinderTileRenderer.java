@@ -64,7 +64,7 @@ public class SoulBinderTileRenderer extends BlockEntityRenderer<SoulBinderEntity
             matrices.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(-90));
             matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(78));
             matrices.translate(-0.95, -0.95, -0.5);
-        }
+        } else MinecraftClient.getInstance().getItemRenderer().renderItem(stack1, ModelTransformation.Mode.GROUND, light, overlay, matrices, vertexConsumers);
 
         if (soulBinder.getEnergyTier(blockState) == 1) {
             matrices.translate(0.4, 0.95, 0.85);
@@ -95,7 +95,7 @@ public class SoulBinderTileRenderer extends BlockEntityRenderer<SoulBinderEntity
             matrices.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(-90));
             matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(-100));
             matrices.translate(-0.4, -0.95, -0.85);
-        }
+        } else MinecraftClient.getInstance().getItemRenderer().renderItem(stack2, ModelTransformation.Mode.GROUND, light, overlay, matrices, vertexConsumers);
 
         if (soulBinder.getMindTier(blockState) == 1) {
             matrices.translate(0.07, 0.95, 0.5);
@@ -124,7 +124,7 @@ public class SoulBinderTileRenderer extends BlockEntityRenderer<SoulBinderEntity
             matrices.scale(1.42857142857f,1.42857142857f,1.42857142857f);
             matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(30));
             matrices.translate(-0.15, -0.98, -0.5);
-        }
+        } else MinecraftClient.getInstance().getItemRenderer().renderItem(stack3, ModelTransformation.Mode.GROUND, light, overlay, matrices, vertexConsumers);
 
         if (soulBinder.getCatalystTier(blockState) == 1) {
             stack4 = new ItemStack(Items.GOLDEN_APPLE, 1);
@@ -155,11 +155,8 @@ public class SoulBinderTileRenderer extends BlockEntityRenderer<SoulBinderEntity
             matrices.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(-90));
             matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(40));
             matrices.translate(-0.55, -0.95, -0.11);
-        }
+        } else MinecraftClient.getInstance().getItemRenderer().renderItem(stack4, ModelTransformation.Mode.GROUND, light, overlay, matrices, vertexConsumers);
 
-//        MinecraftClient.getInstance().getItemRenderer().renderItem(stack2, ModelTransformation.Mode.GROUND, light, overlay, matrices, vertexConsumers);
-//        MinecraftClient.getInstance().getItemRenderer().renderItem(stack3, ModelTransformation.Mode.GROUND, light, overlay, matrices, vertexConsumers);
-//        MinecraftClient.getInstance().getItemRenderer().renderItem(stack4, ModelTransformation.Mode.GROUND, light, overlay, matrices, vertexConsumers);
         matrices.pop();
     }
 }

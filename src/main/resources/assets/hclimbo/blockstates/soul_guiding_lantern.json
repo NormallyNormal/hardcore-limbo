@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "lit=true": { "model": "hclimbo:block/soul_guiding_lantern" },
+    "lit=false": { "model": "hclimbo:block/unlit_soul_guiding_lantern" }
+  }
+}

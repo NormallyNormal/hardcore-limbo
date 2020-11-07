@@ -4,9 +4,13 @@ import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.HopperBlockEntity;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.StateManager;
@@ -32,10 +36,7 @@ public class SoulBinder extends Block implements BlockEntityProvider{
 
     public SoulBinder(AbstractBlock.Settings settings) {
         super(FabricBlockSettings.of(Material.WOOD).nonOpaque().hardness(0.5f));
-        setDefaultState(getStateManager().getDefaultState().with(FORM_TIER, 0));
-        setDefaultState(getStateManager().getDefaultState().with(ENERGY_TIER, 0));
-        setDefaultState(getStateManager().getDefaultState().with(MIND_TIER, 0));
-        setDefaultState(getStateManager().getDefaultState().with(CATALYST_TIER, 0));
+        setDefaultState(getStateManager().getDefaultState().with(FORM_TIER, 0).with(ENERGY_TIER, 0).with(MIND_TIER, 0).with(CATALYST_TIER, 0));
     }
 
     public int getFormTier(BlockState blockState){
@@ -81,7 +82,48 @@ public class SoulBinder extends Block implements BlockEntityProvider{
 
     public ActionResult onUse(BlockState blockState, World world, BlockPos blockPos, PlayerEntity player, Hand hand, BlockHitResult blockHitResult) {
         if (world.isClient) return ActionResult.SUCCESS;
-        System.out.println(((PlayerEntityExt)player).getLastDeathLocation());
+        if (player.getScoreboardTags().contains("formless")) {
+            if (player.getScoreboardTags().contains("formless2")) {
+                if(this.getFormTier(blockState) >= this.getCatalystTier(blockState) && this.getMindTier(blockState) >= this.getCatalystTier(blockState) && this.getEnergyTier(blockState) >= this.getCatalystTier(blockState)){
+                    player.removeScoreboardTag("formless");
+                    player.removeScoreboardTag("formless2");
+                    switch(this.getFormTier(blockState)){
+                        case 1:
+                            player.addScoreboardTag("form3hearts");
+                            player.damage(DamageSource.GENERIC, 1);
+                            break;
+                        case 2:
+                            player.addScoreboardTag("form6hearts");
+                            player.damage(DamageSource.GENERIC, 1);
+                            break;
+                    }
+                    switch(this.getEnergyTier(blockState)){
+                        case 1:
+                            player.addScoreboardTag("energy3food");
+                            break;
+                        case 2:
+                            player.addScoreboardTag("energy6food");
+                            break;
+                    }
+                    switch(this.getMindTier(blockState)){
+                        case 1:
+                            player.addScoreboardTag("mind4divide");
+                            break;
+                        case 2:
+                            player.addScoreboardTag("mind2divide");
+                            break;
+                    }
+                    world.setBlockState(blockPos, blockState.with(FORM_TIER, 0).with(MIND_TIER, 0).with(ENERGY_TIER, 0).with(CATALYST_TIER, 0));
+                    Inventory blockEntity = (Inventory) world.getBlockEntity(blockPos);
+                    for(int i = 0; i < 4; i++){
+                        blockEntity.setStack(i, ItemStack.EMPTY);
+                    }
+                    player.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 200, 1));
+                    System.out.println(world.getBlockState(blockPos));
+                }
+            }
+            return ActionResult.SUCCESS;
+        }
         Inventory blockEntity = (Inventory) world.getBlockEntity(blockPos);
         if (!player.getStackInHand(hand).isEmpty()) {
             // Check what is the first open slot and put an item from the player's hand there

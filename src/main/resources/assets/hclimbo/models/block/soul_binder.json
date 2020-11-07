@@ -3,7 +3,7 @@
 	"texture_size": [64, 36],
 	"textures": {
 		"0": "hclimbo:block/soul_binder",
-		"particle": "block/oak_log"
+		"particle": "block/cobblestone"
 	},
 	"elements": [
 		{

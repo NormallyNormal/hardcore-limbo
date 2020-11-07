@@ -37,7 +37,16 @@ abstract class LivingEntityMixin extends Entity implements PlayerEntityExt {
 //        if (this.getScoreboardTags().contains("NoEffectClearing"))
 //            cir.cancel();
 //    }
-
+    @Inject(method = "getMaxHealth",at = @At("RETURN"),cancellable = true)
+    private void debuffHealth(CallbackInfoReturnable<Float> cir) {
+        if(this.getScoreboardTags().contains("form3hearts")){
+            this.damage(DamageSource.GENERIC, 0);
+            cir.setReturnValue(6.0f);
+        } else if(this.getScoreboardTags().contains("form6hearts")){
+            this.damage(null, 0);
+            cir.setReturnValue(12.0f);
+        }
+    }
 
 
     public LivingEntityMixin(EntityType<? extends Entity> type, World world) {
