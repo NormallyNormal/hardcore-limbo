@@ -3,6 +3,8 @@ package com.normallynormal.hardcorelimbo.mixins;
 import com.mojang.authlib.GameProfile;
 import com.normallynormal.hardcorelimbo.HardcoreLimbo;
 import com.normallynormal.hardcorelimbo.PlayerEntityExt;
+import io.netty.buffer.Unpooled;
+import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -13,6 +15,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -56,7 +59,17 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements PlayerEnt
 //        if (this.getScoreboardTags().contains("formless"))
 //            cir.setReturnValue(false);
 //    }
-    @Inject(method = "copyFrom",at = @At(value = "HEAD"),cancellable = true)
+    @Inject(method = "onSpawn",at = @At("HEAD"),cancellable = true)
+    private void formlessEffect3(CallbackInfo ci){
+        System.out.println(this.getScoreboardTags().contains("formless"));
+        if(!world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY) && this.getScoreboardTags().contains("formless")) {
+            PacketByteBuf passedData = new PacketByteBuf(Unpooled.buffer());
+            passedData.writeBoolean(true);
+            ServerSidePacketRegistry.INSTANCE.sendToPlayer(this.world.getPlayerByUuid(this.getUuid()), HardcoreLimbo.FORMLESS_SHADER, passedData);
+        }
+    }
+
+    @Inject(method = "copyFrom",at = @At(value = "TAIL"),cancellable = true)
     private void copyDeathData(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci) {
         ((PlayerEntityExt)this).setLastDeathLocation(((PlayerEntityExt)oldPlayer).getLastDeathLocation());
         ((PlayerEntityExt)this).setSoulRecoveryPoint(((PlayerEntityExt)oldPlayer).getSoulRecoveryPoint());
@@ -99,9 +112,10 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements PlayerEnt
         }
     }
 
-    @Inject(method = "readCustomDataFromTag", at = @At("HEAD"),cancellable = true)
+    @Inject(method = "readCustomDataFromTag", at = @At("TAIL"),cancellable = true)
     private void readCustomDataFromTag(CompoundTag tag, CallbackInfo ci) {
 //        Entity thisEntity = this;
+
         lastDeathLocation = new Vec3d(tag.getInt("lastDeathLocationX"),tag.getInt("lastDeathLocationY"),tag.getInt("lastDeathLocationZ"));
         soulRecoveryPoint = new Vec3d(tag.getInt("soulRecoveryPointX"),0,tag.getInt("soulRecoveryPointZ"));
     }

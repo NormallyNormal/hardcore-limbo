@@ -1,15 +1,20 @@
 package com.normallynormal.hardcorelimbo;
 
+import com.normallynormal.hardcorelimbo.mixins.GameRendererAccessor;
+import com.normallynormal.hardcorelimbo.mixins.GameRendererInvoker;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.rendereregistry.v1.BlockEntityRendererRegistry;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.loader.util.sat4j.core.Vec;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -24,6 +29,10 @@ public class HardcoreLimboClient implements ClientModInitializer {
         //BlockEntityRendererRegistry.INSTANCE.register(HardcoreLimbo.WIND_CHIMES_ENTITY, WindChimesTileRenderer::new);
         BlockEntityRendererRegistry.INSTANCE.register(HardcoreLimbo.SOUL_BINDER_ENTITY, SoulBinderTileRenderer::new);
         Random randomizer = new Random(System.currentTimeMillis());
+        BlockRenderLayerMap.INSTANCE.putBlock(HardcoreLimbo.WIND_CHIMES, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(HardcoreLimbo.SOUL_BINDER, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(HardcoreLimbo.SOUL_GUIDING_LANTERN, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(HardcoreLimbo.GOLDEN_SOUL_GUIDING_LANTERN, RenderLayer.getCutout());
 //        ClientSidePacketRegistry.INSTANCE.register(HardcoreLimbo.UPDATE_SOUL_BINDER_INVENTORY_CONTENTS,
 //                (packetContext, attachedData) -> packetContext.getTaskQueue().execute(() -> {
 //                    DefaultedList<ItemStack> items = DefaultedList.ofSize(4, ItemStack.EMPTY);
@@ -45,5 +54,21 @@ public class HardcoreLimboClient implements ClientModInitializer {
                     );
                 });
         });
+
+        ClientSidePacketRegistry.INSTANCE.register(HardcoreLimbo.FORMLESS_SHADER,
+                (packetContext, attachedData) -> {
+                    boolean addOrRemove = attachedData.readBoolean();
+                    packetContext.getTaskQueue().execute(() -> {
+                        if(addOrRemove) {
+                            ((GameRendererInvoker) MinecraftClient.getInstance().gameRenderer).InvokeLoadShader(new Identifier("shaders/post/desaturate.json"));
+                            MinecraftClient.getInstance().options.hudHidden = true;
+                            ((ClientPlayerEntityExt) MinecraftClient.getInstance().player).setFormless(true);
+                        } else {
+                            ((GameRendererAccessor) MinecraftClient.getInstance().gameRenderer).getShader().close();
+                            MinecraftClient.getInstance().options.hudHidden = false;
+                            ((ClientPlayerEntityExt) MinecraftClient.getInstance().player).setFormless(false);
+                        }
+                    });
+                });
     }
 }

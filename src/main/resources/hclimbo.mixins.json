@@ -8,7 +8,12 @@
     "LivingEntityMixin",
     "FarmlandMixin",
     "ServerPlayerEntityMixin",
-    "PlayerEntityMixin"
+    "PlayerEntityMixin",
+    "GameRendererMixin",
+    "GameRendererInvoker",
+    "GameRendererAccessor",
+    "KeyboardMixin",
+    "KeyboardAccessor"
   ],
   "client": [
   ],

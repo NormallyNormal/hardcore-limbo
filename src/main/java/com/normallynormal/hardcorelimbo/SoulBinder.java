@@ -1,5 +1,7 @@
 package com.normallynormal.hardcorelimbo;
 
+import io.netty.buffer.Unpooled;
+import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
@@ -12,7 +14,10 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.text.Text;
@@ -85,6 +90,7 @@ public class SoulBinder extends Block implements BlockEntityProvider{
         if (player.getScoreboardTags().contains("formless")) {
             if (player.getScoreboardTags().contains("formless2")) {
                 if(this.getFormTier(blockState) >= this.getCatalystTier(blockState) && this.getMindTier(blockState) >= this.getCatalystTier(blockState) && this.getEnergyTier(blockState) >= this.getCatalystTier(blockState)){
+                    world.playSound(null, blockPos, SoundEvents.BLOCK_END_PORTAL_SPAWN, SoundCategory.BLOCKS, 1f, 1f);
                     player.removeScoreboardTag("formless");
                     player.removeScoreboardTag("formless2");
                     switch(this.getFormTier(blockState)){
@@ -118,6 +124,9 @@ public class SoulBinder extends Block implements BlockEntityProvider{
                     for(int i = 0; i < 4; i++){
                         blockEntity.setStack(i, ItemStack.EMPTY);
                     }
+                    PacketByteBuf passedData = new PacketByteBuf(Unpooled.buffer());
+                    passedData.writeBoolean(false);
+                    ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, HardcoreLimbo.FORMLESS_SHADER, passedData);
                     player.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 200, 1));
                     System.out.println(world.getBlockState(blockPos));
                 }
@@ -130,6 +139,7 @@ public class SoulBinder extends Block implements BlockEntityProvider{
             Item inhand = player.getStackInHand(hand).getItem();
             if ((inhand == Items.IRON_BLOCK || inhand == Items.DIAMOND || inhand == Items.NETHERITE_INGOT) && inhand != blockEntity.getStack(0).getItem()) {
                 // Put the stack the player is holding into the inventory
+                world.playSound(null, blockPos, SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, SoundCategory.BLOCKS, 1f, 1f);
                 if(!blockEntity.getStack(0).isEmpty()) player.inventory.offerOrDrop(world, blockEntity.getStack(0));
                 blockEntity.removeStack(0);
                 blockEntity.setStack(0, player.getStackInHand(hand).getItem().getDefaultStack());
@@ -140,6 +150,7 @@ public class SoulBinder extends Block implements BlockEntityProvider{
                 if(inhand == Items.NETHERITE_INGOT) world.setBlockState(blockPos, blockState.with(FORM_TIER, 3));
             } else if ((inhand == Items.COAL || inhand == Items.BLAZE_ROD || inhand == Items.DRAGON_BREATH) && inhand != blockEntity.getStack(1).getItem()) {
                 // Put the stack the player is holding into the inventory
+                world.playSound(null, blockPos, SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, SoundCategory.BLOCKS, 1f, 1f);
                 if(!blockEntity.getStack(1).isEmpty()) player.inventory.offerOrDrop(world, blockEntity.getStack(1));
                 blockEntity.removeStack(1);
                 blockEntity.setStack(1, player.getStackInHand(hand).getItem().getDefaultStack());
@@ -150,6 +161,7 @@ public class SoulBinder extends Block implements BlockEntityProvider{
                 if(inhand == Items.DRAGON_BREATH) world.setBlockState(blockPos, blockState.with(ENERGY_TIER, 3));
             } else if ((inhand == Items.REDSTONE || inhand == Items.EMERALD_BLOCK || inhand == Items.DRAGON_HEAD) && inhand != blockEntity.getStack(2).getItem()) {
                 // Put the stack the player is holding into the inventory
+                world.playSound(null, blockPos, SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, SoundCategory.BLOCKS, 1f, 1f);
                 if(!blockEntity.getStack(2).isEmpty()) player.inventory.offerOrDrop(world, blockEntity.getStack(2));
                 blockEntity.removeStack(2);
                 blockEntity.setStack(2, player.getStackInHand(hand).getItem().getDefaultStack());
@@ -160,6 +172,7 @@ public class SoulBinder extends Block implements BlockEntityProvider{
                 if(inhand == Items.DRAGON_HEAD) world.setBlockState(blockPos, blockState.with(MIND_TIER, 3));
             } else if ((inhand == Items.GOLDEN_APPLE || inhand == Items.HEART_OF_THE_SEA || inhand == Items.NETHER_STAR) && inhand != blockEntity.getStack(3).getItem()) {
                 // Put the stack the player is holding into the inventory
+                world.playSound(null, blockPos, SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, SoundCategory.BLOCKS, 1f, 1f);
                 if(!blockEntity.getStack(3).isEmpty()) player.inventory.offerOrDrop(world, blockEntity.getStack(3));
                 blockEntity.removeStack(3);
                 blockEntity.setStack(3, player.getStackInHand(hand).getItem().getDefaultStack());
@@ -196,26 +209,4 @@ public class SoulBinder extends Block implements BlockEntityProvider{
         blockEntity.markDirty();
         return ActionResult.SUCCESS;
     }
-
-//    @Override
-//    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-//        if (!world.isClient) {
-//            world.playSound(null, pos, SoundEvents.BLOCK_BELL_USE, SoundCategory.BLOCKS, 1f, 1f);
-//        }
-//
-//        return ActionResult.SUCCESS;
-//    }
-
-//    @Override
-//    public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
-//        super.onEntityCollision(state, world, pos, entity);
-//        if (!world.isClient) {
-//            world.playSound(null, pos, SoundEvents.BLOCK_BELL_USE, SoundCategory.BLOCKS, 1f, 1f);
-//        }
-//    }
-
-    //    @Override
-//    public BlockRenderType getRenderType(BlockState state) {
-//        return BlockRenderType.ENTITYBLOCK_ANIMATED;
-//    }
 }
