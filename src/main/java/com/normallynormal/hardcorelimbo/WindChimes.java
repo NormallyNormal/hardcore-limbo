@@ -20,6 +20,9 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
 import software.bernie.example.registry.TileRegistry;
+import software.bernie.geckolib3.core.controller.AnimationController;
+import software.bernie.geckolib3.core.manager.AnimationData;
+import software.bernie.geckolib3.util.GeckoLibUtil;
 
 public class WindChimes extends Block implements BlockEntityProvider{
 
@@ -42,6 +45,12 @@ public class WindChimes extends Block implements BlockEntityProvider{
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         if (!world.isClient) {
             world.playSound(null, pos, HardcoreLimbo.WIND_CHIMES_SOUND, SoundCategory.BLOCKS, 1f, 1f);
+            WindChimesEntity animated = (WindChimesEntity)world.getBlockEntity(pos);
+            animated.play();
+        }
+        if(world.isClient){
+            WindChimesEntity animated = (WindChimesEntity)world.getBlockEntity(pos);
+            animated.play();
         }
         return ActionResult.SUCCESS;
     }
