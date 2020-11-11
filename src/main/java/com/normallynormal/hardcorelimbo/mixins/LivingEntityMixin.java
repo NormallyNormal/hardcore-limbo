@@ -26,17 +26,7 @@ import java.util.Random;
 @Mixin(LivingEntity.class)
 abstract class LivingEntityMixin extends Entity implements PlayerEntityExt {
 
-//    @Inject(method = "getBlockBreakingSpeed",at = @At("RETURN"),cancellable = true)
-//    private void formlessEffect(BlockState block, CallbackInfoReturnable<Float> cir){
-//        if (this.hasStatusEffect(HardcoreLimbo.FORMLESS))
-//            cir.setReturnValue(0f);
-//    }
-
-//    @Inject(method = "clearStatusEffects",at = @At("INVOKE"),cancellable = true)
-//    private void formlesssEffect(CallbackInfoReturnable<Boolean> cir){
-//        if (this.getScoreboardTags().contains("NoEffectClearing"))
-//            cir.cancel();
-//    }
+    //Reduce max health for players who respawned with low tier form items
     @Inject(method = "getMaxHealth",at = @At("RETURN"),cancellable = true)
     private void debuffHealth(CallbackInfoReturnable<Float> cir) {
         if(this.getScoreboardTags().contains("form3hearts")){
@@ -47,7 +37,6 @@ abstract class LivingEntityMixin extends Entity implements PlayerEntityExt {
             cir.setReturnValue(12.0f);
         }
     }
-
 
     public LivingEntityMixin(EntityType<? extends Entity> type, World world) {
         super(type, world);

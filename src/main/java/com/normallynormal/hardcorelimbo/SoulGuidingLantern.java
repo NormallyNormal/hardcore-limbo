@@ -24,9 +24,7 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
 
-import java.util.Random;
 import java.util.function.Consumer;
-import java.util.function.ToIntBiFunction;
 import java.util.function.ToIntFunction;
 
 public class SoulGuidingLantern extends Block{
@@ -34,6 +32,7 @@ public class SoulGuidingLantern extends Block{
     public static final BooleanProperty LIT = BooleanProperty.of("lit");
 
     public SoulGuidingLantern(AbstractBlock.Settings settings) {
+        //Light level emit based on if this block is lit or not
         super(FabricBlockSettings.of(Material.GLASS).nonOpaque().hardness(0.5f).luminance(createLightLevelFromBlockState(15)));
         setDefaultState(getStateManager().getDefaultState().with(LIT, false));
     }
@@ -50,19 +49,24 @@ public class SoulGuidingLantern extends Block{
         return VoxelShapes.cuboid(0.1875f, 0f, 0.1875f, 0.8125f, 0.875f, 0.8125f);
     }
 
+    //Only allow placing on top or bottom of blocks.
     @Override
     public boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
         return sideCoversSmallSquare(world, pos.up(), Direction.UP) || sideCoversSmallSquare(world, pos.down(), Direction.DOWN);
     }
 
+    //Return light level based on block state.
     private static ToIntFunction<BlockState> createLightLevelFromBlockState(int litLevel) {
         return (blockState) -> (Boolean)blockState.get(Properties.LIT) ? litLevel : 0;
     }
 
+    //Handle player use
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+        //Don't do anything on client
         if (world.isClient) return ActionResult.SUCCESS;
         if (state.get(LIT)) {
+            //If the players a stage 2 ghost, create particles leading to the recovery point
             if(player.getScoreboardTags().contains("formless2")) {
                 PacketByteBuf passedData = new PacketByteBuf(Unpooled.buffer());
                 BlockPos deathLocation = new BlockPos((int) (((PlayerEntityExt) player).getLastDeathLocation().getX()), (int) (((PlayerEntityExt) player).getLastDeathLocation().getY()), (int) (((PlayerEntityExt) player).getLastDeathLocation().getZ()));
@@ -72,11 +76,15 @@ public class SoulGuidingLantern extends Block{
                 passedData.writeBlockPos(deathLocation);
                 ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, HardcoreLimbo.LEADING_PARTICLE, passedData);
             }
+            //Play the extinguish sound and extinguish
             world.playSound(null, pos, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 0.6f, 1f);
             world.setBlockState(pos, state.with(LIT, false));
         }
+        //If its not lit and the player has flint and steel
         else if (!state.get(LIT) && player.getStackInHand(hand).getItem() == Items.FLINT_AND_STEEL) {
+            //Play lit sound
             world.playSound(null, pos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1f, 1f);
+            //Set block state to lit and damage the flint and steel
             world.setBlockState(pos, state.with(LIT, true));
             player.getStackInHand(hand).damage(1, (ServerPlayerEntity)player, (Consumer<ServerPlayerEntity>)((p) -> {
                 p.sendToolBreakStatus(hand);

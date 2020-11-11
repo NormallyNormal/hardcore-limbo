@@ -25,9 +25,11 @@ public class SoulBinderTileRenderer extends BlockEntityRenderer<SoulBinderEntity
         super(dispatcher);
     }
 
+    //This is not the best way to do this
     @Override
     public void render(SoulBinderEntity blockEntity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         matrices.push();
+        //Default to air
         ItemStack stack1 = new ItemStack(Items.AIR, 1);
         ItemStack stack2 = new ItemStack(Items.AIR, 1);
         ItemStack stack3 = new ItemStack(Items.AIR, 1);
@@ -37,11 +39,16 @@ public class SoulBinderTileRenderer extends BlockEntityRenderer<SoulBinderEntity
         BlockState blockState = world.getBlockState(pos);
         SoulBinder soulBinder = (SoulBinder)blockState.getBlock();
 
+        //Change item (and location) based on tier
         if (soulBinder.getFormTier(blockState) == 1) {
+            //Set the item the tier's item
             stack1 = new ItemStack(Items.IRON_BLOCK, 1);
+            //Translate to the right location
             matrices.translate(0.85, 0.875, 0.5);
             matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(12));
+            //Render
             MinecraftClient.getInstance().getItemRenderer().renderItem(stack1, ModelTransformation.Mode.GROUND, light, overlay, matrices, vertexConsumers);
+            //Undo the translation for the next item to be rendered.
             matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(-12));
             matrices.translate(-0.85, -0.875, -0.5);
         }

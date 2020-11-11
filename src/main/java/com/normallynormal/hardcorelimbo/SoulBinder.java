@@ -5,7 +5,6 @@ import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.HopperBlockEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -15,12 +14,10 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.IntProperty;
-import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
@@ -30,10 +27,10 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
 
 public class SoulBinder extends Block implements BlockEntityProvider{
 
+    //Block states for each tier of item.
     public static final IntProperty FORM_TIER = IntProperty.of("form_tier", 0, 3);
     public static final IntProperty ENERGY_TIER = IntProperty.of("energy_tier", 0, 3);
     public static final IntProperty MIND_TIER = IntProperty.of("mind_tier", 0, 3);
@@ -44,6 +41,7 @@ public class SoulBinder extends Block implements BlockEntityProvider{
         setDefaultState(getStateManager().getDefaultState().with(FORM_TIER, 0).with(ENERGY_TIER, 0).with(MIND_TIER, 0).with(CATALYST_TIER, 0));
     }
 
+    //Getters for blockstates
     public int getFormTier(BlockState blockState){
         return blockState.get(FORM_TIER);
     }
@@ -78,6 +76,7 @@ public class SoulBinder extends Block implements BlockEntityProvider{
         return new SoulBinderEntity();
     }
 
+    //Drop the inventory when the block is broken
     @Override
     public void onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
         super.onBreak(world, pos, state, player);
@@ -86,13 +85,17 @@ public class SoulBinder extends Block implements BlockEntityProvider{
     }
 
     public ActionResult onUse(BlockState blockState, World world, BlockPos blockPos, PlayerEntity player, Hand hand, BlockHitResult blockHitResult) {
+        //Don't do anything on the client side
         if (world.isClient) return ActionResult.SUCCESS;
+        //If the players a ghost, stage two ghost, and the catalyst tier is appropriate
         if (player.getScoreboardTags().contains("formless")) {
             if (player.getScoreboardTags().contains("formless2")) {
-                if(this.getFormTier(blockState) >= this.getCatalystTier(blockState) && this.getMindTier(blockState) >= this.getCatalystTier(blockState) && this.getEnergyTier(blockState) >= this.getCatalystTier(blockState)){
+                if(this.getFormTier(blockState) <= this.getCatalystTier(blockState) && this.getMindTier(blockState) <= this.getCatalystTier(blockState) && this.getEnergyTier(blockState) <= this.getCatalystTier(blockState)){
                     world.playSound(null, blockPos, SoundEvents.BLOCK_END_PORTAL_SPAWN, SoundCategory.BLOCKS, 1f, 1f);
+                    //Remove ghost tags
                     player.removeScoreboardTag("formless");
                     player.removeScoreboardTag("formless2");
+                    //Apply effects based on the tiers of items in the soul binder
                     switch(this.getFormTier(blockState)){
                         case 1:
                             player.addScoreboardTag("form3hearts");
@@ -119,65 +122,75 @@ public class SoulBinder extends Block implements BlockEntityProvider{
                             player.addScoreboardTag("mind2divide");
                             break;
                     }
+                    //Remove the items
                     world.setBlockState(blockPos, blockState.with(FORM_TIER, 0).with(MIND_TIER, 0).with(ENERGY_TIER, 0).with(CATALYST_TIER, 0));
                     Inventory blockEntity = (Inventory) world.getBlockEntity(blockPos);
                     for(int i = 0; i < 4; i++){
                         blockEntity.setStack(i, ItemStack.EMPTY);
                     }
+                    //Get rid of the ghost shader
                     PacketByteBuf passedData = new PacketByteBuf(Unpooled.buffer());
                     passedData.writeBoolean(false);
                     ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, HardcoreLimbo.FORMLESS_SHADER, passedData);
+                    //Make the player glow to update the rendering
                     player.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 200, 1));
-                    System.out.println(world.getBlockState(blockPos));
                 }
             }
             return ActionResult.SUCCESS;
         }
         Inventory blockEntity = (Inventory) world.getBlockEntity(blockPos);
         if (!player.getStackInHand(hand).isEmpty()) {
-            // Check what is the first open slot and put an item from the player's hand there
+            //Get the item in the players hand
             Item inhand = player.getStackInHand(hand).getItem();
+            //for form items
             if ((inhand == Items.IRON_BLOCK || inhand == Items.DIAMOND || inhand == Items.NETHERITE_INGOT) && inhand != blockEntity.getStack(0).getItem()) {
-                // Put the stack the player is holding into the inventory
                 world.playSound(null, blockPos, SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, SoundCategory.BLOCKS, 1f, 1f);
+                //If the slot isn't empty, drop what is currently in there
                 if(!blockEntity.getStack(0).isEmpty()) player.inventory.offerOrDrop(world, blockEntity.getStack(0));
                 blockEntity.removeStack(0);
                 blockEntity.setStack(0, player.getStackInHand(hand).getItem().getDefaultStack());
-                // Remove the stack from the player's hand
+                //Remove one from the players hand
                 player.getStackInHand(hand).setCount(player.getStackInHand(hand).getCount() - 1);
+                //Set block state based on the item
                 if(inhand == Items.IRON_BLOCK) world.setBlockState(blockPos, blockState.with(FORM_TIER, 1));
                 if(inhand == Items.DIAMOND) world.setBlockState(blockPos, blockState.with(FORM_TIER, 2));
                 if(inhand == Items.NETHERITE_INGOT) world.setBlockState(blockPos, blockState.with(FORM_TIER, 3));
+                //for energy tier
             } else if ((inhand == Items.COAL || inhand == Items.BLAZE_ROD || inhand == Items.DRAGON_BREATH) && inhand != blockEntity.getStack(1).getItem()) {
-                // Put the stack the player is holding into the inventory
                 world.playSound(null, blockPos, SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, SoundCategory.BLOCKS, 1f, 1f);
+                //If the slot isn't empty, drop what is currently in there
                 if(!blockEntity.getStack(1).isEmpty()) player.inventory.offerOrDrop(world, blockEntity.getStack(1));
                 blockEntity.removeStack(1);
                 blockEntity.setStack(1, player.getStackInHand(hand).getItem().getDefaultStack());
-                // Remove the stack from the player's hand
+                //Remove one from the players hand
                 player.getStackInHand(hand).setCount(player.getStackInHand(hand).getCount() - 1);
+                //Set block state based on the item
                 if(inhand == Items.COAL) world.setBlockState(blockPos, blockState.with(ENERGY_TIER, 1));
                 if(inhand == Items.BLAZE_ROD) world.setBlockState(blockPos, blockState.with(ENERGY_TIER, 2));
                 if(inhand == Items.DRAGON_BREATH) world.setBlockState(blockPos, blockState.with(ENERGY_TIER, 3));
+                //for mind tier
             } else if ((inhand == Items.REDSTONE || inhand == Items.EMERALD_BLOCK || inhand == Items.DRAGON_HEAD) && inhand != blockEntity.getStack(2).getItem()) {
-                // Put the stack the player is holding into the inventory
                 world.playSound(null, blockPos, SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, SoundCategory.BLOCKS, 1f, 1f);
+                //If the slot isn't empty, drop what is currently in there
                 if(!blockEntity.getStack(2).isEmpty()) player.inventory.offerOrDrop(world, blockEntity.getStack(2));
                 blockEntity.removeStack(2);
                 blockEntity.setStack(2, player.getStackInHand(hand).getItem().getDefaultStack());
-                // Remove the stack from the player's hand
+                //Remove one from the players hand
                 player.getStackInHand(hand).setCount(player.getStackInHand(hand).getCount() - 1);
+                //Set block state based on the item
                 if(inhand == Items.REDSTONE) world.setBlockState(blockPos, blockState.with(MIND_TIER, 1));
                 if(inhand == Items.EMERALD_BLOCK) world.setBlockState(blockPos, blockState.with(MIND_TIER, 2));
                 if(inhand == Items.DRAGON_HEAD) world.setBlockState(blockPos, blockState.with(MIND_TIER, 3));
+                //for catalyst tier
             } else if ((inhand == Items.GOLDEN_APPLE || inhand == Items.HEART_OF_THE_SEA || inhand == Items.NETHER_STAR) && inhand != blockEntity.getStack(3).getItem()) {
-                // Put the stack the player is holding into the inventory
                 world.playSound(null, blockPos, SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, SoundCategory.BLOCKS, 1f, 1f);
+                //If the slot isn't empty, drop what is currently in there
                 if(!blockEntity.getStack(3).isEmpty()) player.inventory.offerOrDrop(world, blockEntity.getStack(3));
                 blockEntity.removeStack(3);
                 blockEntity.setStack(3, player.getStackInHand(hand).getItem().getDefaultStack());
-                // Remove the stack from the player's hand
+                //Remove one from the players hand
                 player.getStackInHand(hand).setCount(player.getStackInHand(hand).getCount() - 1);
+                //Set block state based on the item
                 if (inhand == Items.GOLDEN_APPLE) world.setBlockState(blockPos, blockState.with(CATALYST_TIER, 1));
                 if (inhand == Items.HEART_OF_THE_SEA) world.setBlockState(blockPos, blockState.with(CATALYST_TIER, 2));
                 if (inhand == Items.NETHER_STAR) world.setBlockState(blockPos, blockState.with(CATALYST_TIER, 3));

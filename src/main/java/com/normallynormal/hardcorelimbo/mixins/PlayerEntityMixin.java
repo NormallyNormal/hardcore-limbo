@@ -39,27 +39,21 @@ import java.util.Random;
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity{
 
-//    @Inject(method = "getBlockBreakingSpeed",at = @At("RETURN"),cancellable = true)
-//    private void formlessEffect(BlockState block, CallbackInfoReturnable<Float> cir){
-//        if (this.hasStatusEffect(HardcoreLimbo.FORMLESS))
-//            cir.setReturnValue(0f);
-//    }
-
-
+    //Stop block breaking for ghosts
     @Inject(method = "isBlockBreakingRestricted",at = @At("INVOKE"),cancellable = true)
     private void formlessEffect1(World world, BlockPos pos, GameMode gameMode, CallbackInfoReturnable<Boolean> cir){
         if (this.getScoreboardTags().contains("formless"))
             cir.setReturnValue(true);
     }
 
-
-
+    //Stop attacking for ghosts
     @Inject(method = "attack",at = @At("INVOKE"),cancellable = true)
     private void formlessEffect2(Entity entity, CallbackInfo ci){
         if (this.getScoreboardTags().contains("formless"))
             ci.cancel();
     }
 
+    //Handle death location finding and apply hunger effect to players with low tier energy items.
     @Inject(method = "tick",at = @At("HEAD"),cancellable = true)
     private void visitDeathLocation(CallbackInfo ci) {
         if (this.getScoreboardTags().contains("formless") && !this.getScoreboardTags().contains("formless2") && this.isAlive() && ((PlayerEntityExt)this).getLastDeathLocation() != null) {
@@ -77,6 +71,8 @@ public abstract class PlayerEntityMixin extends LivingEntity{
             }
         }
     }
+
+    //Reduce XP gains for players with low tier mind items
     @ModifyVariable(method = "addExperience(I)V", at = @At("HEAD"), ordinal = 0)
     private int injected(int y) {
         double divisor;
@@ -95,15 +91,6 @@ public abstract class PlayerEntityMixin extends LivingEntity{
             return (int)(y / divisor);
         }
     }
-
-//    @Inject(method = "canModifyBlocks",at = @At("INVOKE"),cancellable = true)
-//    private void formlessEffect3(CallbackInfoReturnable<Boolean> cir){
-//        if (this.getScoreboardTags().contains("formless"))
-//            cir.setReturnValue(false);
-//    }
-
-
-
 
     public PlayerEntityMixin(EntityType<? extends LivingEntity> type, World world) {
         super(type, world);

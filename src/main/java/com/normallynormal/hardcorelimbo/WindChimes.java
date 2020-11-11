@@ -19,8 +19,9 @@ import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
+import software.bernie.example.registry.TileRegistry;
 
-public class WindChimes extends Block {
+public class WindChimes extends Block implements BlockEntityProvider{
 
     public WindChimes(AbstractBlock.Settings settings) {
         super(FabricBlockSettings.of(Material.STONE).nonOpaque().hardness(0.5f));
@@ -36,11 +37,23 @@ public class WindChimes extends Block {
         return sideCoversSmallSquare(world, pos.up(), Direction.UP);
     }
 
+    //Play bell sound (placeholder) when right clicked.
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         if (!world.isClient) {
-            world.playSound(null, pos, SoundEvents.BLOCK_BELL_USE, SoundCategory.BLOCKS, 1f, 1f);
+            world.playSound(null, pos, HardcoreLimbo.WIND_CHIMES_SOUND, SoundCategory.BLOCKS, 1f, 1f);
         }
         return ActionResult.SUCCESS;
+    }
+
+    @Override
+    public BlockRenderType getRenderType(BlockState state)
+    {
+        return BlockRenderType.ENTITYBLOCK_ANIMATED;
+    }
+
+    @Override
+    public BlockEntity createBlockEntity(BlockView world) {
+        return HardcoreLimbo.WIND_CHIMES_ENTITY.instantiate();
     }
 }

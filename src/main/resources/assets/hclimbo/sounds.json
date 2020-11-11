@@ -1,0 +1,12 @@
+{
+  "hclimbo.block.wind_chimes": {
+    "category": "block",
+    "sounds": [
+      {
+        "name": "hclimbo:block/wind_chimes/wind_chimes_sound",
+        "volume": 1,
+        "stream": false
+      }
+    ]
+  }
+}

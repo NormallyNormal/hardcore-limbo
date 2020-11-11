@@ -23,27 +23,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ClientPlayerEntity.class)
 abstract class ClientPlayerEntityMixin extends LivingEntity implements ClientPlayerEntityExt {
 
-//    @Inject(method = "getBlockBreakingSpeed",at = @At("RETURN"),cancellable = true)
-//    private void formlessEffect(BlockState block, CallbackInfoReturnable<Float> cir){
-//        if (this.hasStatusEffect(HardcoreLimbo.FORMLESS))
-//            cir.setReturnValue(0f);
-//    }
+    //Does this player have to formless tag?
     boolean formless = false;
 
+    //Disable sprinting particles for ghosts
     @Inject(method = "shouldSpawnSprintingParticles",at = @At("RETURN"),cancellable = true)
-    private void formlesssEffect(CallbackInfoReturnable<Boolean> cir) {
-        if (this.isInvisible())
+    private void formlessEffect(CallbackInfoReturnable<Boolean> cir) {
+        if (this.formless)
             cir.setReturnValue(false);
     }
 
-
-//    @Inject(method = "isBlockBreakingRestricted",at = @At("INVOKE"),cancellable = true)
-//    private void formlessEffect2(World world, BlockPos pos, GameMode gameMode, CallbackInfoReturnable<Boolean> cir){
-//        if (this.getScoreboardTags().contains("formless"))
-//            cir.setReturnValue(true);
-//    }
-
-
+    //Formless set and get methods
     public void setFormless(boolean formless) {
         this.formless = formless;
     }

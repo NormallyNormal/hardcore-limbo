@@ -13,15 +13,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(FarmlandBlock.class)
 abstract class FarmlandMixin extends Block {
 
-//    @Inject(method = "getBlockBreakingSpeed",at = @At("RETURN"),cancellable = true)
-//    private void formlessEffect(BlockState block, CallbackInfoReturnable<Float> cir){
-//        if (this.hasStatusEffect(HardcoreLimbo.FORMLESS))
-//            cir.setReturnValue(0f);
-//    }
-
+    //Stop ghosts from trampling crops
     @Inject(method = "onLandedUpon",at = @At("INVOKE"),cancellable = true)
-    private void formlesssEffect(World world, BlockPos pos, Entity entity, float distance, CallbackInfo callbackInfo){
-        if (true)
+    private void formlessEffect(World world, BlockPos pos, Entity entity, float distance, CallbackInfo callbackInfo){
+        if (entity.getScoreboardTags().contains("formless"))
             callbackInfo.cancel();
     }
 

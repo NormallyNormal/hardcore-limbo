@@ -37,28 +37,19 @@ import java.util.Random;
 @Mixin(ServerPlayerEntity.class)
 abstract class ServerPlayerEntityMixin extends PlayerEntity implements PlayerEntityExt{
 
-
-
-//    @Inject(method = "getBlockBreakingSpeed",at = @At("RETURN"),cancellable = true)
-//    private void formlessEffect(BlockState block, CallbackInfoReturnable<Float> cir){
-//        if (this.hasStatusEffect(HardcoreLimbo.FORMLESS))
-//            cir.setReturnValue(0f);
-//    }
+    //Store death and recovery locations
     private Vec3d lastDeathLocation;
     private Vec3d soulRecoveryPoint;
     private Random randomizer = new Random(System.currentTimeMillis());
 
+    //Apply some spectator mode things to ghosts so I don't have to program all that
     @Inject(method = "isSpectator",at = @At("HEAD"),cancellable = true)
     private void formlessEffect1(CallbackInfoReturnable<Boolean> cir){
         if (this.getScoreboardTags().contains("formless"))
             cir.setReturnValue(true);
     }
 
-//    @Inject(method = "canModifyBlocks",at = @At("INVOKE"),cancellable = true)
-//    private void formlessEffect3(CallbackInfoReturnable<Boolean> cir){
-//        if (this.getScoreboardTags().contains("formless"))
-//            cir.setReturnValue(false);
-//    }
+    //Ensure that all ghosts have the shader, hidden HUD when created.
     @Inject(method = "onSpawn",at = @At("HEAD"),cancellable = true)
     private void formlessEffect3(CallbackInfo ci){
         System.out.println(this.getScoreboardTags().contains("formless"));
@@ -69,12 +60,14 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements PlayerEnt
         }
     }
 
+    //Pass on death location and recovery location to next instance after dying
     @Inject(method = "copyFrom",at = @At(value = "TAIL"),cancellable = true)
     private void copyDeathData(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci) {
         ((PlayerEntityExt)this).setLastDeathLocation(((PlayerEntityExt)oldPlayer).getLastDeathLocation());
         ((PlayerEntityExt)this).setSoulRecoveryPoint(((PlayerEntityExt)oldPlayer).getSoulRecoveryPoint());
     }
 
+    //Store death location and recovery location (random) on death
     @Inject(method = "onDeath",at = @At(value = "TAIL"),cancellable = true)
     private void addFormless(DamageSource source, CallbackInfo ci) {
         if(!world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
@@ -83,6 +76,7 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements PlayerEnt
             ((PlayerEntityExt) this).setLastDeathLocation(lastDeathLocation);
             ((PlayerEntityExt) this).setSoulRecoveryPoint(soulRecoveryPoint);
             this.addScoreboardTag("formless");
+            //Spectators don't set XP to zero so we do this
             this.experienceLevel = 0;
             this.experienceProgress = 0;
         }
@@ -94,13 +88,14 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements PlayerEnt
         this.removeScoreboardTag("mind4divide");
     }
 
+    //Stop server player from attacking
     @Inject(method = "attack",at = @At("INVOKE"),cancellable = true)
     private void formlessEffect2(Entity entity, CallbackInfo ci){
         if (this.getScoreboardTags().contains("formless"))
             ci.cancel();
     }
 
-
+    //Store recovery and death locations to NBT data
     @Inject(method = "writeCustomDataToTag", at = @At("HEAD"),cancellable = true)
     private void writeCustomDataToTag(CompoundTag tag, CallbackInfo ci) {
         if(lastDeathLocation != null && soulRecoveryPoint != null){
@@ -112,10 +107,9 @@ abstract class ServerPlayerEntityMixin extends PlayerEntity implements PlayerEnt
         }
     }
 
+    //Read recovery and death locations from NBT data
     @Inject(method = "readCustomDataFromTag", at = @At("TAIL"),cancellable = true)
     private void readCustomDataFromTag(CompoundTag tag, CallbackInfo ci) {
-//        Entity thisEntity = this;
-
         lastDeathLocation = new Vec3d(tag.getInt("lastDeathLocationX"),tag.getInt("lastDeathLocationY"),tag.getInt("lastDeathLocationZ"));
         soulRecoveryPoint = new Vec3d(tag.getInt("soulRecoveryPointX"),0,tag.getInt("soulRecoveryPointZ"));
     }

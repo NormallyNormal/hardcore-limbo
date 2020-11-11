@@ -47,7 +47,6 @@ public class SoulBinderEntity extends BlockEntity implements ImplementedInventor
         for (int i = 0; i < result.length; i++) {
             result[i] = i;
         }
-
         return result;
     }
 
